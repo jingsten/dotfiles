@@ -362,10 +362,23 @@ adjust_zshrc() {
     source "$HOME/.zshrc"
 }
 
+setup_sudo() {
+    log_info "Setup passwordless sudo for script..."
+    # Grant temporary full sudo access without a password
+    echo "$USER ALL=(ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/setup_temp
+}
+
+reset_sudo() {
+    log_info "Reset passwordless sudo access..."
+    # Clean up and remove the elevated privilege
+    sudo rm /etc/sudoers.d/setup_temp
+}
+
+
 # Main installation function
 main() {
     log_info "Starting dotfiles setup..."
-
+    setup_sudo
     detect_os
     install_homebrew
     install_oh_my_zsh
@@ -376,6 +389,7 @@ main() {
     install_uv
     change_shell_to_zsh
     adjust_zshrc
+    reset_sudo
 
     log_success "Dotfiles setup completed successfully!"
     log_info "Please restart your terminal or run 'exec zsh' to apply all changes"
